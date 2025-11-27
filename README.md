@@ -166,6 +166,10 @@ messages = client.read_with_poll(
 
 # Pop a message (read and delete atomically)
 message = client.pop("orders")
+
+# Peek at messages without affecting visibility or read count
+# (useful for monitoring, debugging, admin UIs)
+messages = client.peek("orders", qty: 10)
 ```
 
 ### Message Processing
@@ -296,6 +300,7 @@ end
 | `read(queue, vt:, qty: 1)` | Read messages with visibility timeout |
 | `read_with_poll(queue, vt:, qty:, max_poll_seconds:, poll_interval_ms:)` | Read with blocking poll |
 | `pop(queue)` | Read and delete atomically |
+| `peek(queue, qty: 1)` | View messages without affecting visibility or read count |
 | `delete(queue, msg_id)` | Delete a message |
 | `delete_batch(queue, msg_ids)` | Delete multiple messages |
 | `archive(queue, msg_id)` | Archive a message |

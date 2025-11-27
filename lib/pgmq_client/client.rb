@@ -203,6 +203,26 @@ module PGMQ
       Message.from_pg_row(result.first)
     end
 
+    # Peek at messages without affecting their visibility or read count
+    #
+    # Unlike read(), this method queries the queue table directly and does NOT:
+    # - Set a visibility timeout on messages
+    # - Increment the read count
+    #
+    # This is useful for monitoring, debugging, and admin interfaces where you
+    # want to inspect the queue without consuming messages.
+    #
+    # @param queue_name [String] Name of the queue
+    # @param qty [Integer] Number of messages to peek at (default: 1)
+    # @return [Array<Message>]
+    def peek(queue_name, qty: 1)
+      result = @connection.exec(
+        "SELECT msg_id, read_ct, enqueued_at, vt, message FROM pgmq.q_#{sanitize_queue_name(queue_name)} ORDER BY msg_id LIMIT $1",
+        [qty]
+      )
+      result.map { |row| Message.from_pg_row(row) }
+    end
+
     # =========================================================================
     # Deleting and Archiving
     # =========================================================================
@@ -293,6 +313,19 @@ module PGMQ
     def metrics_all
       result = @connection.exec("SELECT * FROM pgmq.metrics_all()")
       result.map { |row| Metrics.from_pg_row(row) }
+    end
+
+    private
+
+    # Sanitize queue name to prevent SQL injection
+    # Only allows alphanumeric characters and underscores
+    # @param queue_name [String] Name of the queue
+    # @return [String] Sanitized queue name
+    def sanitize_queue_name(queue_name)
+      sanitized = queue_name.to_s.gsub(/[^a-zA-Z0-9_]/, "")
+      raise ArgumentError, "Invalid queue name: #{queue_name}" if sanitized.empty?
+
+      sanitized
     end
   end
 end
