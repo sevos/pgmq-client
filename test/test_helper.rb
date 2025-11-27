@@ -25,8 +25,8 @@ class IntegrationTest < Minitest::Test
     if @client&.connected?
       begin
         @client.drop_queue(@test_queue)
-      rescue PGMQ::QueueNotFoundError
-        # Queue may not exist, ignore
+      rescue PGMQ::QueueNotFoundError, PG::Error
+        # Queue may not exist or may have detached archive, ignore
       end
       @client.close
     end

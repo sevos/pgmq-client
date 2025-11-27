@@ -212,7 +212,7 @@ module PGMQ
     # @param msg_id [Integer] Message ID
     # @return [Boolean] true if deleted
     def delete(queue_name, msg_id)
-      result = @connection.exec("SELECT pgmq.delete($1, $2)", [queue_name, msg_id])
+      result = @connection.exec("SELECT pgmq.delete($1::text, $2::bigint)", [queue_name, msg_id])
       result.first["delete"] == "t"
     end
 
@@ -236,7 +236,7 @@ module PGMQ
     # @param msg_id [Integer] Message ID
     # @return [Boolean] true if archived
     def archive(queue_name, msg_id)
-      result = @connection.exec("SELECT pgmq.archive($1, $2)", [queue_name, msg_id])
+      result = @connection.exec("SELECT pgmq.archive($1::text, $2::bigint)", [queue_name, msg_id])
       result.first["archive"] == "t"
     end
 
