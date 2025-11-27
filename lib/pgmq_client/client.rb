@@ -122,12 +122,12 @@ module PGMQ
       json_message = JSON.generate(message)
       result = if delay > 0
                  @connection.exec(
-                   "SELECT pgmq.send($1, $2::jsonb, $3)",
+                   "SELECT pgmq.send($1::text, $2::jsonb, $3::integer)",
                    [queue_name, json_message, delay]
                  )
                else
                  @connection.exec(
-                   "SELECT pgmq.send($1, $2::jsonb)",
+                   "SELECT pgmq.send($1::text, $2::jsonb)",
                    [queue_name, json_message]
                  )
                end
@@ -148,12 +148,12 @@ module PGMQ
 
       result = if delay > 0
                  @connection.exec(
-                   "SELECT * FROM pgmq.send_batch($1, $2::jsonb[], $3)",
+                   "SELECT * FROM pgmq.send_batch($1::text, $2::jsonb[], $3::integer)",
                    [queue_name, pg_array, delay]
                  )
                else
                  @connection.exec(
-                   "SELECT * FROM pgmq.send_batch($1, $2::jsonb[])",
+                   "SELECT * FROM pgmq.send_batch($1::text, $2::jsonb[])",
                    [queue_name, pg_array]
                  )
                end
