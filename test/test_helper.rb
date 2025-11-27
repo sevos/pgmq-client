@@ -25,8 +25,11 @@ class IntegrationTest < Minitest::Test
     if @client&.connected?
       begin
         @client.drop_queue(@test_queue)
-      rescue PGMQ::QueueNotFoundError, PG::Error
-        # Queue may not exist or may have detached archive, ignore
+      rescue PGMQ::QueueNotFoundError
+        # Queue may not exist, ignore
+      rescue PG::ObjectNotInPrerequisiteState => e
+        # Archive table may have been detached, ignore this specific error
+        raise unless e.message.include?("is not a member of extension")
       end
       @client.close
     end
